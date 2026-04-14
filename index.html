@@ -1978,7 +1978,7 @@ async function startPayment() {
   btn.disabled = true;
   btn.classList.add('clicked');
   setTimeout(() => btn.classList.remove('clicked'), 150);
-  btn.textContent = 'Opening Razorpay…';
+  btn.textContent = 'Placing Order…';
 
   const useBackend = !!NIKKASHI_CONFIG.BACKEND_URL;
 
@@ -1995,62 +1995,15 @@ async function startPayment() {
 
       _lastOrderId = orderData.orderId;
 
-      // ── OPEN RAZORPAY WITH BACKEND ORDER ID ──────────────────
-      const options = {
-        key:        NIKKASHI_CONFIG.RAZORPAY_KEY,
-        amount:     orderData.amount,          // in paise from backend
-        currency:   'INR',
-        order_id:   orderData.orderId,         // backend-issued order ID
-        name:       'POP by Nikkashi',
-        description: `${cart.length} item${cart.length>1?'s':''}`,
-        prefill:    { name, contact: phone },
-        notes:      { address },
-        theme:      { color: '#E8106A' },
-        handler: async function(response) {
-          // Verify payment on backend
-          try {
-            const verifyRes = await fetch(NIKKASHI_CONFIG.BACKEND_URL + '/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id:   response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
-                customer,
-                items: _lastOrderCart,
-                amount: _lastOrderTotal,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.status !== 'success') throw new Error('Verification failed');
-          } catch(e) {
-            console.warn('[Nikkashi] Backend verify error:', e.message);
-            // Don't block user — order is captured on Razorpay side
-          }
-          onPaymentSuccess(response.razorpay_payment_id);
-        },
-        modal: { ondismiss: onPaymentDismiss }
-      };
-      new Razorpay(options).open();
+      // 🔥 INSTANT CHECKOUT: skip Razorpay, order is already placed + stock reduced
+      onPaymentSuccess(null);
 
     // ── CLIENT-ONLY MODE (no backend) ─────────────────────────
     } else {
       const localOrderId = generateOrderId();
       _lastOrderId = localOrderId;
-
-      const options = {
-        key:         NIKKASHI_CONFIG.RAZORPAY_KEY,
-        amount:      total * 100,
-        currency:    'INR',
-        name:        'POP by Nikkashi',
-        description: `Order ${localOrderId} · ${cart.length} item${cart.length>1?'s':''}`,
-        prefill:     { name, contact: phone },
-        notes:       { address, order_id: localOrderId },
-        theme:       { color: '#E8106A' },
-        handler: function(response) { onPaymentSuccess(response.razorpay_payment_id); },
-        modal:   { ondismiss: onPaymentDismiss }
-      };
-      new Razorpay(options).open();
+      // 🔥 INSTANT CHECKOUT: skip Razorpay in client-only mode too
+      onPaymentSuccess(null);
     }
 
   } catch(e) {
