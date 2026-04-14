@@ -1250,7 +1250,7 @@ nav {
       </div>
     </div>
     <div class="cat-grid">
-      <div class="cat-card" onclick="filterAndGo('Earrings')">
+      <div class="cat-card" onclick="filterAndGo('Earring')">
         <div class="cat-placeholder-bg">💎</div>
         <div class="cat-card-overlay">
           <div class="cat-count">12 Styles</div>
@@ -1258,19 +1258,19 @@ nav {
           <span class="cat-badge">New Drops</span>
         </div>
       </div>
-      <div class="cat-card" onclick="filterAndGo('Necklaces')">
-        <div class="cat-placeholder-bg">📿</div>
+      <div class="cat-card" onclick="filterAndGo('Brooch')">
+        <div class="cat-placeholder-bg">📌</div>
         <div class="cat-card-overlay">
           <div class="cat-count">8 Styles</div>
-          <div class="cat-name">Necklaces</div>
+          <div class="cat-name">Brooches</div>
           <span class="cat-badge">Bestseller</span>
         </div>
       </div>
-      <div class="cat-card" onclick="filterAndGo('Accessories')">
+      <div class="cat-card" onclick="filterAndGo('Bracelet')">
         <div class="cat-placeholder-bg">✨</div>
         <div class="cat-card-overlay">
           <div class="cat-count">15 Styles</div>
-          <div class="cat-name">Accessories</div>
+          <div class="cat-name">Bracelets</div>
           <span class="cat-badge">Hot Right Now</span>
         </div>
       </div>
@@ -1444,9 +1444,9 @@ nav {
   <div class="shop-controls">
     <div class="filter-tabs" id="shopFilters">
       <button class="filter-tab active" onclick="filterProducts('all', this)">All</button>
-      <button class="filter-tab" onclick="filterProducts('Earrings', this)">Earrings</button>
-      <button class="filter-tab" onclick="filterProducts('Necklaces', this)">Necklaces</button>
-      <button class="filter-tab" onclick="filterProducts('Accessories', this)">Accessories</button>
+      <button class="filter-tab" onclick="filterProducts('Earring', this)">Earrings</button>
+      <button class="filter-tab" onclick="filterProducts('Brooch', this)">Brooches</button>
+      <button class="filter-tab" onclick="filterProducts('Bracelet', this)">Bracelets</button>
       <button class="filter-tab" onclick="filterProducts('Bestseller', this)">Bestsellers</button>
     </div>
     <span class="products-count" id="shopCount"></span>
@@ -1556,14 +1556,14 @@ try {
 
 // ── STATIC FALLBACK (used if Firebase is not yet configured) ────────────────
 const STATIC_PRODUCTS = [
-  { sku:'NK-001', name:'Starfall Hoop Set',      category:'Earrings',     price:649, badge:'Bestseller', desc:'Lightweight gold-toned hoops with a celestial star detail. Perfect for day to night transitions.', material:'Gold-toned brass',    style:'Statement Hoops', razorpayLink:'#', emoji:'⭐', rating:4.9, reviews:47 },
-  { sku:'NK-002', name:'Midnight Bloom Necklace', category:'Necklaces',    price:849, badge:'New',        desc:'A delicate layered necklace featuring an abstract floral motif. Wear it alone or stack it.',     material:'Silver-plated alloy', style:'Layered Pendant', razorpayLink:'#', emoji:'🌸', rating:4.8, reviews:32 },
-  { sku:'NK-003', name:'Cosmic Cuff Bracelet',    category:'Accessories',  price:549, badge:'Limited',    desc:'Bold oxidised metal cuff with cosmic etching. One size fits most.',                              material:'Oxidised metal',      style:'Cuff',           razorpayLink:'#', emoji:'🌙', rating:4.7, reviews:28 },
-  { sku:'NK-004', name:'Ember Drop Earrings',     category:'Earrings',     price:749, badge:'Bestseller', desc:'Warm terracotta and gold enamel drop earrings. A colour-pop piece for bold dressers.',           material:'Enamel + gold tone',  style:'Drop Earrings',  razorpayLink:'#', emoji:'🔥', rating:5.0, reviews:61 },
-  { sku:'NK-005', name:'Luminary Chain Set',      category:'Necklaces',    price:999, badge:'Bestseller', desc:'Three stackable chains in different lengths — layered look, zero effort.',                       material:'Gold-toned alloy',    style:'Chain Set',      razorpayLink:'#', emoji:'✨', rating:4.9, reviews:53 },
-  { sku:'NK-006', name:'Petal Ring Stack',        category:'Accessories',  price:399, badge:'New',        desc:'A set of 3 minimal petal-shaped rings. Stack all three or wear solo.',                          material:'Sterling silver tone', style:'Ring Set',       razorpayLink:'#', emoji:'💍', rating:4.8, reviews:19 },
-  { sku:'NK-007', name:'Aurora Stud Set',         category:'Earrings',     price:449, badge:'New',        desc:'Tiny aurora borealis-inspired studs in iridescent tones. Subtle magic for every day.',           material:'Crystal + brass',     style:'Studs',          razorpayLink:'#', emoji:'🌈', rating:4.7, reviews:24 },
-  { sku:'NK-008', name:'Solstice Anklet',         category:'Accessories',  price:499, badge:'Limited',    desc:'Delicate sun-charm anklet in adjustable oxidised gold. Summer or winter — always gorgeous.',      material:'Oxidised gold alloy', style:'Anklet',          razorpayLink:'#', emoji:'🌞', rating:4.9, reviews:37 },
+  { sku:'NK-001', name:'Starfall Hoop Set',      category:'Earring',   price:649, badge:'Bestseller', desc:'Lightweight gold-toned hoops with a celestial star detail. Perfect for day to night transitions.', material:'Gold-toned brass',    style:'Statement Hoops', razorpayLink:'#', emoji:'⭐', rating:4.9, reviews:47 },
+  { sku:'NK-002', name:'Midnight Bloom Brooch',  category:'Brooch',    price:849, badge:'New',        desc:'A delicate brooch featuring an abstract floral motif. Pin it to a jacket or tote bag.',          material:'Silver-plated alloy', style:'Floral Pin',      razorpayLink:'#', emoji:'🌸', rating:4.8, reviews:32 },
+  { sku:'NK-003', name:'Cosmic Cuff Bracelet',   category:'Bracelet',  price:549, badge:'Limited',    desc:'Bold oxidised metal cuff with cosmic etching. One size fits most.',                              material:'Oxidised metal',      style:'Cuff',            razorpayLink:'#', emoji:'🌙', rating:4.7, reviews:28 },
+  { sku:'NK-004', name:'Ember Drop Earrings',    category:'Earring',   price:749, badge:'Bestseller', desc:'Warm terracotta and gold enamel drop earrings. A colour-pop piece for bold dressers.',           material:'Enamel + gold tone',  style:'Drop Earrings',   razorpayLink:'#', emoji:'🔥', rating:5.0, reviews:61 },
+  { sku:'NK-005', name:'Starburst Statement',    category:'Brooch',    price:999, badge:'Bestseller', desc:'A bold starburst brooch that commands attention — layer it or wear solo.',                       material:'Gold-toned alloy',    style:'Statement Pin',   razorpayLink:'#', emoji:'✨', rating:4.9, reviews:53 },
+  { sku:'NK-006', name:'Petal Charm Bracelet',   category:'Bracelet',  price:399, badge:'New',        desc:'A delicate petal-charm chain bracelet. Dainty but distinctive.',                                material:'Sterling silver tone', style:'Chain Bracelet',  razorpayLink:'#', emoji:'💍', rating:4.8, reviews:19 },
+  { sku:'NK-007', name:'Aurora Stud Set',        category:'Earring',   price:449, badge:'New',        desc:'Tiny aurora borealis-inspired studs in iridescent tones. Subtle magic for every day.',           material:'Crystal + brass',     style:'Studs',           razorpayLink:'#', emoji:'🌈', rating:4.7, reviews:24 },
+  { sku:'NK-008', name:'Solstice Link Bracelet', category:'Bracelet',  price:499, badge:'Limited',    desc:'Adjustable link bracelet in oxidised gold. Summer or winter — always gorgeous.',                  material:'Oxidised gold alloy', style:'Link Bracelet',   razorpayLink:'#', emoji:'🌞', rating:4.9, reviews:37 },
 ];
 
 // ── LIVE products array (populated by Firebase or static fallback) ──────────
@@ -1606,7 +1606,7 @@ var stockMap = {};
     else { stockMap = Object.assign({}, DEFAULT_STOCK); localStorage.setItem('nikkashi_stock', JSON.stringify(stockMap)); }
   } catch(e) { stockMap = Object.assign({}, DEFAULT_STOCK); }
 })();
-function getStock(sku, product) { if (product && product.stock !== undefined) return product.stock; return (stockMap[sku] !== undefined) ? stockMap[sku] : 5; }
+function getStock(sku) { return (stockMap[sku] !== undefined) ? stockMap[sku] : 5; }
 function reduceStock(sku) {
   if (stockMap[sku] > 0) stockMap[sku]--;
   try { localStorage.setItem('nikkashi_stock', JSON.stringify(stockMap)); } catch(e) {}
@@ -1663,11 +1663,11 @@ function scrollToSection(id) {
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function renderCard(p) {
-  const stockLabel = p.stock <= 0 ? 'Sold Out' : p.stock <= 3 ? `Only ${p.stock} left` : `${p.stock} in stock`;
-  const isSoldOut = p.stock <= 0;
+  const stockLabel = getStockLabel(p.sku);
+  const isSoldOut = getStock(p.sku) <= 0;
   return `<div class="product-card" onclick="${isSoldOut ? '' : `openModal('${escJson(p)}')`}" style="${isSoldOut ? 'opacity:0.6;cursor:not-allowed;' : ''}">
     <div class="card-img-wrap">
-      ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : ""}${isSoldOut ? `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);background:#e00;color:#fff;font-size:1rem;font-weight:900;padding:0.4rem 2rem;letter-spacing:2px;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:2;">SOLD OUT</div>` : ""}
+      ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : `<div class="card-placeholder">${p.emoji}</div>`}
       ${p.badge ? `<span class="card-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
       ${!isSoldOut ? '<div class="card-quick-view">Quick View</div>' : ''}
     </div>
@@ -1677,9 +1677,9 @@ function renderCard(p) {
       <div class="card-detail">${p.category} · ${p.material || ''}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
         <div class="card-price">₹${p.price.toLocaleString('en-IN')}</div>
-        <div style="font-size:0.65rem;font-weight:700;color:#aaa;">⭐${p.rating || "4.8"} (${p.reviews || "50"})</div>
+        <div style="font-size:0.65rem;font-weight:700;color:#aaa;">⭐${p.rating} (${p.reviews})</div>
       </div>
-      <div class="card-stock" style="${p.stock <= 3 ? 'color:var(--hot-pink);font-weight:800;' : ''}">${stockLabel}</div>
+      <div class="card-stock" style="${getStock(p.sku) <= 3 ? 'color:var(--hot-pink);font-weight:800;' : ''}">${stockLabel}</div>
     </div>
   </div>`;
 }
@@ -1725,16 +1725,6 @@ function openModal(pJson) {
 
   document.getElementById('modalDesc').textContent = p.desc;
   document.getElementById('modalPh').textContent = p.emoji;
-  const modalWrap = document.getElementById('modalImgWrap');
-  const existingImg = modalWrap.querySelector('img');
-  if (existingImg) existingImg.remove();
-  if (p.image) {
-    const img = document.createElement('img');
-    img.src = p.image;
-    img.alt = p.name;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-    modalWrap.insertBefore(img, modalWrap.firstChild);
-  }
 
   // Badge
   const badgeEl = document.getElementById('modalBadge');
@@ -1743,9 +1733,9 @@ function openModal(pJson) {
 
   // Dynamic proof + real stock + viewer count
   const sold = p.reviews ? p.reviews * 3 : 120;
-  const stockNow = p.stock !== undefined ? p.stock : getStock(p.sku);
-  document.getElementById('modalProof').innerHTML = `⭐ ${p.rating || "4.8"} · ${p.reviews || 50} reviews · 🔥 ${sold}+ sold`;
-  const _s = p.stock !== undefined ? p.stock : getStock(p.sku); document.getElementById('modalUrgency').innerHTML = _s <= 0 ? '❌ Sold Out' : _s <= 3 ? `⚠ Only ${_s} left` : `✅ ${_s} in stock`;
+  const stockNow = getStock(p.sku);
+  document.getElementById('modalProof').innerHTML = `⭐ ${p.rating} · ${p.reviews} reviews · 🔥 ${sold}+ sold`;
+  document.getElementById('modalUrgency').innerHTML = getStockLabel(p.sku);
 
   // Viewer count — add element if not present
   let viewerEl = document.getElementById('modalViewers');
@@ -1762,7 +1752,7 @@ function openModal(pJson) {
   document.getElementById('modalMeta').innerHTML = `
     <div><div class="meta-label">Material</div><div class="meta-value">${p.material || '—'}</div></div>
     <div><div class="meta-label">Style</div><div class="meta-value">${p.style || p.category}</div></div>
-    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${p.rating || "4.8"} (${p.reviews || 50})</div></div>
+    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${p.rating} (${p.reviews})</div></div>
     <div><div class="meta-label">In Stock</div><div class="meta-value">${stockNow > 0 ? stockNow : '0 — Sold Out'}</div></div>
   `;
 
