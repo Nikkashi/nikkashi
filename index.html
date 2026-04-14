@@ -1459,7 +1459,8 @@ nav {
   <div class="modal" id="productModal">
     <div class="modal-img-wrap" id="modalImgWrap">
       <button class="modal-close" onclick="closeModalBtn()">✕</button>
-      <div class="modal-ph" id="modalPh"></div>
+      <img id="modalImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+      <div class="modal-ph" id="modalPh" style="position:relative;z-index:1;"></div>
     </div>
     <div class="modal-content">
       <span class="modal-badge badge-bestseller" id="modalBadge"></span>
@@ -1740,7 +1741,18 @@ function openModal(pJson) {
     `₹${discounted.toLocaleString('en-IN')} <span class="og-price">₹${original.toLocaleString('en-IN')}</span> <span class="discount-tag">${savePct}% OFF</span>`;
 
   document.getElementById('modalDesc').textContent = p.desc;
-  document.getElementById('modalPh').textContent = p.emoji;
+  // Image
+  const imgEl = document.getElementById('modalImg');
+  const phEl  = document.getElementById('modalPh');
+  if (p.image) {
+    imgEl.src = p.image;
+    imgEl.style.display = 'block';
+    phEl.style.display = 'none';
+  } else {
+    imgEl.style.display = 'none';
+    phEl.style.display = 'flex';
+    phEl.textContent = p.emoji;
+  }
 
   // Badge
   const badgeEl = document.getElementById('modalBadge');
@@ -1748,9 +1760,11 @@ function openModal(pJson) {
   else { badgeEl.style.display='none'; }
 
   // Dynamic proof + real stock + viewer count
-  const sold = p.reviews ? p.reviews * 3 : 120;
+  const rating  = p.rating  || 4.8;
+  const reviews = p.reviews || 120;
+  const sold    = reviews * 3;
   const stockNow = getStock(p.sku);
-  document.getElementById('modalProof').innerHTML = `⭐ ${p.rating} · ${p.reviews} reviews · 🔥 ${sold}+ sold`;
+  document.getElementById('modalProof').innerHTML = `⭐ ${rating} · ${reviews} reviews · 🔥 ${sold}+ sold`;
   const _ms = getStock(p.sku);
   document.getElementById('modalUrgency').innerHTML = _ms <= 0 ? '❌ Sold Out' : _ms <= 3 ? `🔥 Only ${_ms} left!` : _ms <= 6 ? `⚡ Only ${_ms} left` : `${_ms} in stock`;
 
@@ -1769,7 +1783,7 @@ function openModal(pJson) {
   document.getElementById('modalMeta').innerHTML = `
     <div><div class="meta-label">Material</div><div class="meta-value">${p.material || '—'}</div></div>
     <div><div class="meta-label">Style</div><div class="meta-value">${p.style || p.category}</div></div>
-    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${p.rating} (${p.reviews})</div></div>
+    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${rating} (${reviews})</div></div>
     <div><div class="meta-label">In Stock</div><div class="meta-value">${stockNow > 0 ? stockNow : '0 — Sold Out'}</div></div>
   `;
 
