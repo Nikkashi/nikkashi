@@ -1576,6 +1576,7 @@ function loadProducts() {
     .then(data => {
       products = Array.isArray(data) ? data : (data.products || []);
       if (!products.length) products = STATIC_PRODUCTS.slice();
+      initStockFromProducts(products);
       _onProductsReady();
     })
     .catch(e => {
@@ -1595,29 +1596,19 @@ function _onProductsReady() {
   }
 }
 
-// ── STOCK SYSTEM (System 3: Dynamic stock per SKU) ───────────────────────────
-// Starts with realistic numbers; persists across page visits via localStorage
-const DEFAULT_STOCK = { 'NK-001':8,'NK-002':5,'NK-003':3,'NK-004':12,'NK-005':6,'NK-006':9,'NK-007':7,'NK-008':4 };
+// ── STOCK SYSTEM — sourced from API, session-reduced on purchase ──────────────
 var stockMap = {};
-(function initStock() {
-  try {
-    const saved = localStorage.getItem('nikkashi_stock');
-    if (saved) { stockMap = JSON.parse(saved); }
-    else { stockMap = Object.assign({}, DEFAULT_STOCK); localStorage.setItem('nikkashi_stock', JSON.stringify(stockMap)); }
-  } catch(e) { stockMap = Object.assign({}, DEFAULT_STOCK); }
-})();
-function getStock(sku, product) { if (product && product.stock !== undefined) return product.stock; return (stockMap[sku] !== undefined) ? stockMap[sku] : 5; }
+function initStockFromProducts(productList) {
+  productList.forEach(p => { if (p.sku) stockMap[p.sku] = p.stock != null ? p.stock : 1; });
+}
+function getStock(sku) { return (stockMap[sku] !== undefined) ? stockMap[sku] : 1; }
 function reduceStock(sku) {
   if (stockMap[sku] > 0) stockMap[sku]--;
-  try { localStorage.setItem('nikkashi_stock', JSON.stringify(stockMap)); } catch(e) {}
+  // Also update the live products array so renders stay consistent
+  const prod = products.find(p => p.sku === sku);
+  if (prod) prod.stock = stockMap[sku];
 }
-function getStockLabel(sku) {
-  const s = getStock(sku);
-  if (s <= 0) return '❌ Sold Out';
-  if (s <= 3) return `🔥 Only ${s} left!`;
-  if (s <= 6) return `⚡ Only ${s} left`;
-  return `${s} in stock`;
-}
+
 
 function getEmoji(p) { return p.emoji || '💎'; }
 
@@ -1663,23 +1654,27 @@ function scrollToSection(id) {
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 function renderCard(p) {
-  const stockLabel = p.stock <= 0 ? 'Sold Out' : p.stock <= 3 ? `Only ${p.stock} left` : `${p.stock} in stock`;
-  const isSoldOut = p.stock <= 0;
+  const stockNow = getStock(p.sku);
+  const isSoldOut = stockNow <= 0;
+  const stockLabel = isSoldOut ? '❌ Sold Out'
+    : stockNow <= 3 ? `🔥 Only ${stockNow} left!`
+    : stockNow <= 6 ? `⚡ Only ${stockNow} left`
+    : `${stockNow} in stock`;
   return `<div class="product-card" onclick="${isSoldOut ? '' : `openModal('${escJson(p)}')`}" style="${isSoldOut ? 'opacity:0.6;cursor:not-allowed;' : ''}">
     <div class="card-img-wrap">
-      ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : ""}${isSoldOut ? `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);background:#e00;color:#fff;font-size:1rem;font-weight:900;padding:0.4rem 2rem;letter-spacing:2px;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:2;">SOLD OUT</div>` : ""}
-      ${p.badge ? `<span class="card-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+      ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">` : `<div class="card-placeholder">${p.emoji || '💎'}</div>`}
+      ${isSoldOut ? '<span class="card-badge badge-limited" style="background:#888;">Sold Out</span>' : (p.badge ? `<span class="card-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : '')}
       ${!isSoldOut ? '<div class="card-quick-view">Quick View</div>' : ''}
     </div>
     <div class="card-info">
       <div class="card-sku">${p.sku}</div>
       <div class="card-name">${p.name}</div>
-      <div class="card-detail">${p.category} · ${p.material || ''}</div>
+      <div class="card-detail">${p.category}${p.material ? ' · ' + p.material : ''}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
         <div class="card-price">₹${p.price.toLocaleString('en-IN')}</div>
-        <div style="font-size:0.65rem;font-weight:700;color:#aaa;">⭐${p.rating || "4.8"} (${p.reviews || "50"})</div>
+        ${p.rating ? `<div style="font-size:0.65rem;font-weight:700;color:#aaa;">⭐${p.rating} (${p.reviews})</div>` : ''}
       </div>
-      <div class="card-stock" style="${p.stock <= 3 ? 'color:var(--hot-pink);font-weight:800;' : ''}">${stockLabel}</div>
+      <div class="card-stock" style="${stockNow <= 3 ? 'color:var(--hot-pink);font-weight:800;' : ''}">${stockLabel}</div>
     </div>
   </div>`;
 }
@@ -1698,11 +1693,14 @@ function filterProducts(filter, btn) {
   renderShop(products.length ? products : STATIC_PRODUCTS, filter);
 }
 
-// Bestsellers on home page (first 4)
+// Bestsellers on home page (first 4 in-stock products)
 function renderHomeBestsellers() {
   const src = products.length ? products : STATIC_PRODUCTS;
-  const bestsellers = src.filter(p => p.badge === 'Bestseller').slice(0,4);
-  document.getElementById('homeBestsellers').innerHTML = bestsellers.map(renderCard).join('');
+  // Prefer badge=Bestseller; fall back to any in-stock products
+  let picks = src.filter(p => p.badge === 'Bestseller' && getStock(p.sku) > 0).slice(0,4);
+  if (!picks.length) picks = src.filter(p => getStock(p.sku) > 0).slice(0,4);
+  if (!picks.length) picks = src.slice(0,4); // absolute fallback
+  document.getElementById('homeBestsellers').innerHTML = picks.map(renderCard).join('');
 }
 // Boot — load products (Firebase or static)
 loadProducts();
@@ -1725,16 +1723,6 @@ function openModal(pJson) {
 
   document.getElementById('modalDesc').textContent = p.desc;
   document.getElementById('modalPh').textContent = p.emoji;
-  const modalWrap = document.getElementById('modalImgWrap');
-  const existingImg = modalWrap.querySelector('img');
-  if (existingImg) existingImg.remove();
-  if (p.image) {
-    const img = document.createElement('img');
-    img.src = p.image;
-    img.alt = p.name;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-    modalWrap.insertBefore(img, modalWrap.firstChild);
-  }
 
   // Badge
   const badgeEl = document.getElementById('modalBadge');
@@ -1743,9 +1731,10 @@ function openModal(pJson) {
 
   // Dynamic proof + real stock + viewer count
   const sold = p.reviews ? p.reviews * 3 : 120;
-  const stockNow = p.stock !== undefined ? p.stock : getStock(p.sku);
-  document.getElementById('modalProof').innerHTML = `⭐ ${p.rating || "4.8"} · ${p.reviews || 50} reviews · 🔥 ${sold}+ sold`;
-  const _s = p.stock !== undefined ? p.stock : getStock(p.sku); document.getElementById('modalUrgency').innerHTML = _s <= 0 ? '❌ Sold Out' : _s <= 3 ? `⚠ Only ${_s} left` : `✅ ${_s} in stock`;
+  const stockNow = getStock(p.sku);
+  document.getElementById('modalProof').innerHTML = `⭐ ${p.rating} · ${p.reviews} reviews · 🔥 ${sold}+ sold`;
+  const _ms = getStock(p.sku);
+  document.getElementById('modalUrgency').innerHTML = _ms <= 0 ? '❌ Sold Out' : _ms <= 3 ? `🔥 Only ${_ms} left!` : _ms <= 6 ? `⚡ Only ${_ms} left` : `${_ms} in stock`;
 
   // Viewer count — add element if not present
   let viewerEl = document.getElementById('modalViewers');
@@ -1762,7 +1751,7 @@ function openModal(pJson) {
   document.getElementById('modalMeta').innerHTML = `
     <div><div class="meta-label">Material</div><div class="meta-value">${p.material || '—'}</div></div>
     <div><div class="meta-label">Style</div><div class="meta-value">${p.style || p.category}</div></div>
-    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${p.rating || "4.8"} (${p.reviews || 50})</div></div>
+    <div><div class="meta-label">Rating</div><div class="meta-value">⭐ ${p.rating} (${p.reviews})</div></div>
     <div><div class="meta-label">In Stock</div><div class="meta-value">${stockNow > 0 ? stockNow : '0 — Sold Out'}</div></div>
   `;
 
