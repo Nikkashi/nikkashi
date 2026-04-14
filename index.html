@@ -1973,8 +1973,10 @@ var _lastOrderId = '';
 var _lastOrderCart = [];
 var _lastOrderTotal = 0;
 var _lastCustomer = {};
+var _orderInFlight = false;  // 🔒 double-click guard
 
 async function startPayment() {
+  if (_orderInFlight) return;  // block concurrent calls
   const name    = document.getElementById('custName').value.trim();
   const phone   = document.getElementById('custPhone').value.trim();
   const address = document.getElementById('custAddress').value.trim();
@@ -1989,8 +1991,8 @@ async function startPayment() {
   _lastOrderTotal = total;
   _lastCustomer   = customer;
 
+  _orderInFlight = true;
   btn.disabled = true;
-  btn.classList.add('clicked');
   setTimeout(() => btn.classList.remove('clicked'), 150);
   btn.textContent = 'Placing Order…';
 
@@ -2022,6 +2024,7 @@ async function startPayment() {
     }
 
   } catch(e) {
+    _orderInFlight = false;
     showToast(e.message || 'Something went wrong. Please try again.');
     btn.disabled = false;
     btn.textContent = `Complete Order — ₹${total.toLocaleString('en-IN')} 🔒`;
@@ -2029,6 +2032,7 @@ async function startPayment() {
 }
 
 function onPaymentSuccess(paymentId) {
+  _orderInFlight = false;  // 🔒 release guard
   closeCheckout();
   // Reduce stock for purchased items (client-side mirror)
   _lastOrderCart.forEach(item => { if (item.sku) reduceStock(item.sku); });
