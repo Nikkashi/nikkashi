@@ -1990,24 +1990,25 @@ async function startPayment() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: total, items: cart, customer }),
       });
-      if (!orderRes.ok) throw new Error('Backend /create-order failed: ' + orderRes.status);
+      if (!orderRes.ok) {
+        const errData = await orderRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Order failed. Please try again.');
+      }
       const orderData = await orderRes.json();
 
       _lastOrderId = orderData.orderId;
 
-      // 🔥 INSTANT CHECKOUT: skip Razorpay, order is already placed + stock reduced
+      // 🔥 INSTANT CHECKOUT: skip Razorpay
       onPaymentSuccess(null);
 
     // ── CLIENT-ONLY MODE (no backend) ─────────────────────────
     } else {
-      const localOrderId = generateOrderId();
-      _lastOrderId = localOrderId;
-      // 🔥 INSTANT CHECKOUT: skip Razorpay in client-only mode too
+      _lastOrderId = generateOrderId();
       onPaymentSuccess(null);
     }
 
   } catch(e) {
-    showToast('Payment error: ' + e.message);
+    showToast(e.message || 'Something went wrong. Please try again.');
     btn.disabled = false;
     btn.textContent = `Complete Order — ₹${total.toLocaleString('en-IN')} 🔒`;
   }
