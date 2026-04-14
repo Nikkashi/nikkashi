@@ -1998,7 +1998,7 @@ async function startPayment() {
   const useBackend = !!NIKKASHI_CONFIG.BACKEND_URL;
 
   try {
-    // ── WITH BACKEND: create order server-side ─────────────────
+    // ── WITH BACKEND: create order + open Razorpay modal ──────
     if (useBackend) {
       const orderRes = await fetch(NIKKASHI_CONFIG.BACKEND_URL + '/create-order', {
         method: 'POST',
@@ -2013,8 +2013,49 @@ async function startPayment() {
 
       _lastOrderId = orderData.orderId;
 
-      // 🔥 INSTANT CHECKOUT: skip Razorpay
-      onPaymentSuccess(null);
+      const options = {
+        key:       orderData.key,
+        amount:    orderData.amount,
+        currency:  'INR',
+        order_id:  orderData.orderId,
+        name:      'POP by Nikkashi',
+        description: 'Jewellery & Accessories',
+        prefill: {
+          name:    customer.name,
+          contact: customer.phone,
+        },
+        theme: { color: '#E8106A' },
+
+        handler: async function(response) {
+          try {
+            const verifyRes = await fetch(NIKKASHI_CONFIG.BACKEND_URL + '/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
+                items:    _lastOrderCart,
+                customer: _lastCustomer,
+                amount:   _lastOrderTotal,
+              }),
+            });
+            if (!verifyRes.ok) throw new Error('Payment verification failed.');
+            onPaymentSuccess(response.razorpay_payment_id);
+          } catch(verifyErr) {
+            showToast(verifyErr.message || 'Verification failed. Contact support.');
+            btn.disabled = false;
+            btn.textContent = `Complete Order — ₹${total.toLocaleString('en-IN')} 🔒`;
+          }
+        },
+
+        modal: {
+          ondismiss: onPaymentDismiss,
+        },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
 
     // ── CLIENT-ONLY MODE (no backend) ─────────────────────────
     } else {
