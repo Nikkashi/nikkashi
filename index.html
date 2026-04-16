@@ -1636,9 +1636,14 @@ function renderHeroMosaic() {
   });
   // Fill remaining slots from any in-stock products
   inStock.forEach(p => { if (picks.length < 3 && !picks.includes(p)) picks.push(p); });
-  picks.slice(0,3).forEach((p, i) => {
+  const heroImgs = [
+    'https://firebasestorage.googleapis.com/v0/b/pop-by-nikkashi-7f354.firebasestorage.app/o/Hero1.png?alt=media',
+    'https://firebasestorage.googleapis.com/v0/b/pop-by-nikkashi-7f354.firebasestorage.app/o/Hero2.png?alt=media',
+    'https://firebasestorage.googleapis.com/v0/b/pop-by-nikkashi-7f354.firebasestorage.app/o/Hero3.png?alt=media'
+  ];
+  heroImgs.forEach((url, i) => {
     const el = document.getElementById('mosaicImg' + i);
-    if (el && p.image) el.innerHTML = `<img src="${p.image}" alt="${p.name}" loading="lazy">`;
+    if (el) el.innerHTML = `<img src="${url}" alt="POP by Nikkashi" loading="lazy">`;
   });
 }
 
