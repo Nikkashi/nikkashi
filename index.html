@@ -1574,8 +1574,21 @@ var products = [];
 
 // ── LOAD PRODUCTS (from Railway backend with static fallback) ────────────────
 function loadProducts() {
+  // Pre-warm Railway (Singapore server) before fetching products
+  fetch(NIKKASHI_CONFIG.BACKEND_URL + '/health').catch(() => {});
   // Keep Railway awake
 setInterval(() => fetch(NIKKASHI_CONFIG.BACKEND_URL + '/health').catch(()=>{}), 14 * 60 * 1000);
+
+// Load cached products instantly if available
+const _cached = localStorage.getItem('nikkashi_products');
+if (_cached) {
+  try {
+    products = JSON.parse(_cached);
+    initStockFromProducts(products);
+    _onProductsReady();
+    console.log('[Nikkashi] Loaded', products.length, 'products from cache');
+  } catch(e) { products = []; }
+}
 
 function attemptFetch(retries) {
   fetch(NIKKASHI_CONFIG.BACKEND_URL + '/products')
@@ -1583,17 +1596,18 @@ function attemptFetch(retries) {
     .then(data => {
       products = Array.isArray(data) ? data : (data.products || []);
       if (!products.length) products = STATIC_PRODUCTS.slice();
+      localStorage.setItem('nikkashi_products', JSON.stringify(products));
       initStockFromProducts(products);
       _onProductsReady();
+      console.log('[Nikkashi] Loaded', products.length, 'products from backend');
     })
     .catch(e => {
       if (retries > 0) {
         console.warn('[Nikkashi] Retrying...', retries);
-        setTimeout(() => attemptFetch(retries - 1), 4000);
+        setTimeout(() => attemptFetch(retries - 1), 6000);
       } else {
         console.warn('[Nikkashi] Backend fetch failed — using static fallback.', e);
-        products = STATIC_PRODUCTS.slice();
-        _onProductsReady();
+        if (!products.length) { products = STATIC_PRODUCTS.slice(); _onProductsReady(); }
       }
     });
 }
